@@ -11,21 +11,20 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+import json
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['BEACHTIME_SECRET_KEY']
+SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = 'BEACHTIME_DEBUG' in os.environ
+CF_VCAP_APPLICATION_ENVVAR = 'VCAP_APPLICATION'
+DEBUG = 'DJANGO_DEBUG' in os.environ and not CF_VCAP_APPLICATION_ENVVAR in os.environ
 
-ALLOWED_HOSTS = [] if DEBUG else 'prerequisite-busy-crocodile.cfapps.io'
+CF_VCAP_APPLICATION = None if DEBUG else json.loads(os.environ[CF_VCAP_APPLICATION_ENVVAR])
+ALLOWED_HOSTS       = []   if DEBUG else CF_VCAP_APPLICATION['application_uris']
 
 
 # Application definition
@@ -117,4 +116,5 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
